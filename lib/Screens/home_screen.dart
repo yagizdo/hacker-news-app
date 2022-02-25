@@ -20,6 +20,25 @@ class _HomeScreenState extends State<HomeScreen> {
     BaseOptions options = BaseOptions();
     options.baseUrl = 'https://hacker-news.firebaseio.com/';
     dio = Dio(options);
+    getPostID();
+  }
+
+  // Get Post ID's
+  Future<List> getPostID() async {
+    setState(() {
+      isIDLoading = true;
+    });
+    Response? result = await dio?.get('v0/topstories.json?print=pretty');
+    if (result?.statusCode == 200) {
+      (result?.data as List).forEach((value) {
+        postIDList.add(value);
+      });
+    }
+    setState(() {
+      isIDLoading = false;
+    });
+
+    return postIDList;
   }
 
   @override
