@@ -1,5 +1,6 @@
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
+import 'package:hackernews_read_app/Models/post_model.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({Key? key}) : super(key: key);
@@ -13,6 +14,7 @@ class _HomeScreenState extends State<HomeScreen> {
   var postIDList = <int>[];
   bool isIDLoading = false;
   bool isPostsLoading = false;
+  PostModel? posts;
 
   @override
   void initState() {
@@ -21,6 +23,7 @@ class _HomeScreenState extends State<HomeScreen> {
     options.baseUrl = 'https://hacker-news.firebaseio.com/';
     dio = Dio(options);
     getPostID();
+    getPosts();
   }
 
   // Get Post ID's
@@ -39,6 +42,19 @@ class _HomeScreenState extends State<HomeScreen> {
     });
 
     return postIDList;
+  }
+
+  Future<void> getPosts() async {
+    setState(() {
+      isPostsLoading = true;
+    });
+    final response = await dio?.get('v0/item/30438250.json?print=pretty');
+    if (response?.statusCode == 200) {
+      posts = PostModel.fromJson(response?.data);
+    }
+    setState(() {
+      isPostsLoading = false;
+    });
   }
 
   @override
