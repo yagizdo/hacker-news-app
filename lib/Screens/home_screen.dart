@@ -1,6 +1,5 @@
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
-import 'package:hackernews_read_app/Models/post_model.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({Key? key}) : super(key: key);
@@ -11,10 +10,11 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   Dio? dio;
+
+  late List posts;
   var postIDList = <int>[];
-  bool isIDLoading = false;
-  bool isPostsLoading = false;
-  PostModel? posts;
+
+  bool loading = false;
 
   @override
   void initState() {
@@ -22,43 +22,73 @@ class _HomeScreenState extends State<HomeScreen> {
     BaseOptions options = BaseOptions();
     options.baseUrl = 'https://hacker-news.firebaseio.com/';
     dio = Dio(options);
-    getPostID();
-    getPosts();
+    initializePosts();
+  }
+
+  void initializePosts() async {
+    setState(() {
+      loading = true;
+    });
+
+    List postIDs = await getPostIDs();
+
+    var postResponse = await Stream.fromIterable(postIDs)
+        .take(10)
+        .asyncMap((id) => getPostById(id))
+        .toList();
+
+    posts = postResponse;
+
+    setState(() {
+      loading = false;
+    });
   }
 
   // Get Post ID's
-  Future<List> getPostID() async {
-    setState(() {
-      isIDLoading = true;
-    });
-    Response? result = await dio?.get('v0/topstories.json?print=pretty');
-    if (result?.statusCode == 200) {
-      (result?.data as List).forEach((value) {
-        postIDList.add(value);
-      });
+  Future getPostIDs() async {
+    Response result = await dio!.get('v0/topstories.json');
+
+    if (result.statusCode == 200) {
+      return result.data;
+    } else {
+      print('Error : ${result.headers}');
     }
-    setState(() {
-      isIDLoading = false;
-    });
 
     return postIDList;
   }
 
-  Future<void> getPosts() async {
+  Future getPostById(int postID) async {
     setState(() {
-      isPostsLoading = true;
+      loading = true;
     });
-    final response = await dio?.get('v0/item/30438250.json?print=pretty');
-    if (response?.statusCode == 200) {
-      posts = PostModel.fromJson(response?.data);
+
+    final response = await dio!.get('v0/item/$postID.json');
+
+    if (response.statusCode == 200) {
+      return response.data;
     }
+
     setState(() {
-      isPostsLoading = false;
+      loading = false;
     });
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold();
+    return Scaffold(
+      appBar: AppBar(title: const Text('HackerNews')),
+      body: Center(
+          child: !loading
+              ? ListView.builder(
+                  padding: const EdgeInsets.all(8),
+                  itemCount: posts.length,
+                  itemBuilder: (BuildContext context, int index) {
+                    return Container(
+                      height: 50,
+                      child: Center(child: Text('${posts[index]["title"]}')),
+                    );
+                  })
+              : Text('Loading...')),
+    );
   }
 }
