@@ -1,6 +1,8 @@
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 
+import '../Widgets/post_card.dart';
+
 class HomeScreen extends StatefulWidget {
   const HomeScreen({Key? key}) : super(key: key);
 
@@ -76,16 +78,20 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('HackerNews')),
+      appBar: AppBar(
+        title: const Text('HackerNews'),
+        backgroundColor: Colors.orange,
+      ),
       body: Center(
           child: !loading
               ? ListView.builder(
                   padding: const EdgeInsets.all(8),
                   itemCount: posts.length,
                   itemBuilder: (BuildContext context, int index) {
-                    return Container(
-                      height: 50,
-                      child: Center(child: Text('${posts[index]["title"]}')),
+                    return PostCard(
+                      title: posts[index]['title'],
+                      url: posts[index]['url'],
+                      writer: posts[index]['by'],
                     );
                   })
               : Text('Loading...')),
