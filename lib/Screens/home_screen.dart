@@ -35,6 +35,7 @@ class _HomeScreenState extends State<HomeScreen> {
       if (_scrollController.position.pixels ==
           _scrollController.position.maxScrollExtent) {
         print('new data call');
+        print('end : $end');
         addNewDatas();
       }
     });
@@ -54,24 +55,26 @@ class _HomeScreenState extends State<HomeScreen> {
     List postIDs = await getPostIDs();
 
     var postResponse = await Stream.fromIterable(postIDs)
-        .take(50)
         .asyncMap((id) => getPostById(id))
         .toList();
-
-    listed_posts = postResponse.sublist(start, end);
+    posts = postResponse;
+    listed_posts = posts.sublist(start, end);
 
     setState(() {
       loading = false;
-
-      start += 5;
-      end += 5;
     });
   }
 
   void addNewDatas() async {
-    var newDatas = await listed_posts.sublist(0, 10);
+    var temp_start = 0;
+    var temp_end = end + 5;
+
     setState(() {
-      listed_posts = List.from(listed_posts)..addAll(newDatas);
+      listed_posts = List.from(posts.sublist(start, end));
+      //listed_posts.addAll(posts.sublist(start, end));
+
+      start = temp_start;
+      end = temp_end;
     });
   }
 
