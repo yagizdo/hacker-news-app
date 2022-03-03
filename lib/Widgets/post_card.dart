@@ -36,9 +36,6 @@ class PostCard extends StatelessWidget {
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                 ),
-                Divider(
-                  color: Colors.orange,
-                )
               ],
             ),
           )

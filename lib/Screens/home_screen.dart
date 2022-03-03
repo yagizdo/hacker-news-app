@@ -17,6 +17,7 @@ class _HomeScreenState extends State<HomeScreen> {
   var postIDList = <int>[];
 
   bool loading = false;
+  final ScrollController _scrollController = ScrollController();
 
   @override
   void initState() {
@@ -25,6 +26,20 @@ class _HomeScreenState extends State<HomeScreen> {
     options.baseUrl = 'https://hacker-news.firebaseio.com/';
     dio = Dio(options);
     initializePosts();
+
+    _scrollController.addListener(() {
+      if (_scrollController.position.pixels ==
+          _scrollController.position.maxScrollExtent) {
+        print('new data call');
+        debugPrint('Test : ${posts.sublist(5, 10)}');
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+    _scrollController.dispose();
   }
 
   void initializePosts() async {
@@ -35,7 +50,7 @@ class _HomeScreenState extends State<HomeScreen> {
     List postIDs = await getPostIDs();
 
     var postResponse = await Stream.fromIterable(postIDs)
-        .take(10)
+        .take(30)
         .asyncMap((id) => getPostById(id))
         .toList();
 
@@ -84,17 +99,28 @@ class _HomeScreenState extends State<HomeScreen> {
       ),
       body: Center(
           child: !loading
-              ? ListView.builder(
+              ? ListView.separated(
+                  controller: _scrollController,
                   padding: const EdgeInsets.all(8),
                   itemCount: posts.length,
                   itemBuilder: (BuildContext context, int index) {
                     return PostCard(
                       title: posts[index]['title'],
-                      url: posts[index]['url'],
+                      url: posts[index]['url'] ?? 'No url',
                       writer: posts[index]['by'],
                     );
-                  })
-              : Text('Loading...')),
+                  },
+                  separatorBuilder: (BuildContext context, int index) =>
+                      Divider(
+                    color: Colors.orange,
+                  ),
+                )
+              : Container(
+                  alignment: Alignment.center,
+                  color: Colors.orange,
+                  child: const CircularProgressIndicator(
+                    color: Colors.white,
+                  ))),
     );
   }
 }
