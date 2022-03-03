@@ -14,6 +14,10 @@ class _HomeScreenState extends State<HomeScreen> {
   Dio? dio;
 
   late List posts;
+  late List listed_posts;
+
+  int start = 0;
+  int end = 10;
   var postIDList = <int>[];
 
   bool loading = false;
@@ -31,7 +35,7 @@ class _HomeScreenState extends State<HomeScreen> {
       if (_scrollController.position.pixels ==
           _scrollController.position.maxScrollExtent) {
         print('new data call');
-        debugPrint('Test : ${posts.sublist(5, 10)}');
+        addNewDatas();
       }
     });
   }
@@ -50,14 +54,24 @@ class _HomeScreenState extends State<HomeScreen> {
     List postIDs = await getPostIDs();
 
     var postResponse = await Stream.fromIterable(postIDs)
-        .take(30)
+        .take(50)
         .asyncMap((id) => getPostById(id))
         .toList();
 
-    posts = postResponse;
+    listed_posts = postResponse.sublist(start, end);
 
     setState(() {
       loading = false;
+
+      start += 5;
+      end += 5;
+    });
+  }
+
+  void addNewDatas() async {
+    var newDatas = await listed_posts.sublist(0, 10);
+    setState(() {
+      listed_posts = List.from(listed_posts)..addAll(newDatas);
     });
   }
 
@@ -102,12 +116,12 @@ class _HomeScreenState extends State<HomeScreen> {
               ? ListView.separated(
                   controller: _scrollController,
                   padding: const EdgeInsets.all(8),
-                  itemCount: posts.length,
+                  itemCount: listed_posts.length,
                   itemBuilder: (BuildContext context, int index) {
                     return PostCard(
-                      title: posts[index]['title'],
-                      url: posts[index]['url'] ?? 'No url',
-                      writer: posts[index]['by'],
+                      title: listed_posts[index]['title'],
+                      url: listed_posts[index]['url'] ?? 'No url',
+                      writer: listed_posts[index]['by'],
                     );
                   },
                   separatorBuilder: (BuildContext context, int index) =>
