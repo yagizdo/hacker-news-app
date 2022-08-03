@@ -5,6 +5,14 @@ abstract class DataState {}
 
 class DataInitial extends DataState {}
 
-class GetPostState extends DataState {}
+class GetPostState extends DataState {
+  final List<PostModel> posts;
 
-class LoadingState extends DataState {}
+  GetPostState(this.posts);
+}
+
+class LoadingState extends DataState {
+  final bool isLoading;
+
+  LoadingState(this.isLoading);
+}
