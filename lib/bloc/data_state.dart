@@ -6,13 +6,13 @@ abstract class DataState {}
 class DataInitial extends DataState {}
 
 class GetPostState extends DataState {
-  final List<PostModel> posts;
+  final List posts;
 
   GetPostState(this.posts);
 }
 
 class LoadingState extends DataState {
-  final bool isLoading;
+  bool isLoading;
 
   LoadingState(this.isLoading);
 }
