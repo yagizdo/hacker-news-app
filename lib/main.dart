@@ -1,8 +1,14 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:hackernews_read_app/Screens/home_screen.dart';
 
+import 'bloc/data_bloc.dart';
+
 void main() {
-  runApp(const MyApp());
+  runApp(BlocProvider(
+    create: (context) => DataBloc(),
+    child: const MyApp(),
+  ));
 }
 
 class MyApp extends StatelessWidget {
@@ -17,7 +23,7 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
-      home: HomeScreen(),
+      home: const HomeScreen(),
     );
   }
 }
