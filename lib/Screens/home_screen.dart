@@ -1,4 +1,3 @@
-import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 
 import '../Widgets/post_card.dart';
@@ -11,14 +10,11 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  Dio? dio;
-
   late List posts;
   late List listed_posts;
 
   int start = 0;
   int end = 10;
-  var postIDList = <int>[];
 
   bool loading = false;
   final ScrollController _scrollController = ScrollController();
@@ -26,9 +22,6 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   void initState() {
     super.initState();
-    BaseOptions options = BaseOptions();
-    options.baseUrl = 'https://hacker-news.firebaseio.com/';
-    dio = Dio(options);
     initializePosts();
 
     _scrollController.addListener(() {
@@ -59,48 +52,6 @@ class _HomeScreenState extends State<HomeScreen> {
         .toList();
     posts = postResponse;
     listed_posts = posts.sublist(start, end);
-
-    setState(() {
-      loading = false;
-    });
-  }
-
-  void addNewDatas() async {
-    var temp_start = 0;
-    var temp_end = end + 5;
-
-    setState(() {
-      listed_posts = List.from(posts.sublist(start, end));
-      //listed_posts.addAll(posts.sublist(start, end));
-
-      start = temp_start;
-      end = temp_end;
-    });
-  }
-
-  // Get Post ID's
-  Future getPostIDs() async {
-    Response result = await dio!.get('v0/topstories.json');
-
-    if (result.statusCode == 200) {
-      return result.data;
-    } else {
-      print('Error : ${result.headers}');
-    }
-
-    return postIDList;
-  }
-
-  Future getPostById(int postID) async {
-    setState(() {
-      loading = true;
-    });
-
-    final response = await dio!.get('v0/item/$postID.json');
-
-    if (response.statusCode == 200) {
-      return response.data;
-    }
 
     setState(() {
       loading = false;
